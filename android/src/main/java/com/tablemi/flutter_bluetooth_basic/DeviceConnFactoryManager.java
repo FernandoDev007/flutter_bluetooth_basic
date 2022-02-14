@@ -42,7 +42,7 @@ public class DeviceConnFactoryManager {
     private static DeviceConnFactoryManager[] deviceConnFactoryManagers = new DeviceConnFactoryManager[4];
 
     private boolean isOpenPort;
-    /**
+    /**  //Nose chino
      * ESC查询打印机实时状态指令 // ESC query printer real-time status instruction
      */
     private byte[] esc = {0x10, 0x04, 0x02};

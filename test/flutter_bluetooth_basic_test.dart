@@ -1,6 +1,6 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_bluetooth_basic/flutter_bluetooth_basic.dart';
+import 'package:flutter/services.dart';
+
 
 void main() {
   const MethodChannel channel = MethodChannel('flutter_bluetooth_basic');
@@ -17,3 +17,4 @@ void main() {
     channel.setMockMethodCallHandler(null);
   });
 }
+

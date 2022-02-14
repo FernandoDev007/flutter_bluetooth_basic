@@ -1,8 +1,11 @@
-import 'dart:convert';
-// import 'dart:typed_data';
+//TODO: En emuladores dara un error al inicializar, ya que estos no cuenta con Bluetooth
+///solo funciona con los emuladores
 
-import 'package:flutter/material.dart';
+
 import 'package:flutter_bluetooth_basic/flutter_bluetooth_basic.dart';
+import 'package:flutter/material.dart';
+import 'dart:convert';
+
 
 void main() => runApp(MyApp());
 

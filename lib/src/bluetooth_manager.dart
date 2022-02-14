@@ -1,23 +1,20 @@
-import 'dart:async';
-
 import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
-
 import 'bluetooth_device.dart';
+import 'dart:async';
 
-/// A BluetoothManager.
+
 class BluetoothManager {
   static const String NAMESPACE = 'flutter_bluetooth_basic';
   static const int CONNECTED = 1;
   static const int DISCONNECTED = 0;
 
-  static const MethodChannel _channel =
-      const MethodChannel('$NAMESPACE/methods');
-  static const EventChannel _stateChannel =
-      const EventChannel('$NAMESPACE/state');
+  static const MethodChannel _channel = const MethodChannel('$NAMESPACE/methods');
+  static const EventChannel _stateChannel = const EventChannel('$NAMESPACE/state');
+
   Stream<MethodCall> get _methodStream => _methodStreamController.stream;
-  final StreamController<MethodCall> _methodStreamController =
-      StreamController.broadcast();
+  final StreamController<MethodCall> _methodStreamController = StreamController.broadcast();
+
 
   BluetoothManager._() {
     _channel.setMethodCallHandler((MethodCall call) {
@@ -26,27 +23,45 @@ class BluetoothManager {
     });
   }
 
+
+  PublishSubject _stopScanPill = new PublishSubject();
+
   static BluetoothManager _instance = BluetoothManager._();
-
   static BluetoothManager get instance => _instance;
-
-  // Future<bool> get isAvailable async =>
-  //     await _channel.invokeMethod('isAvailable').then<bool>((d) => d);
-
-  // Future<bool> get isOn async =>
-  //     await _channel.invokeMethod('isOn').then<bool>((d) => d);
-
-  Future<bool> get isConnected async =>
-      await _channel.invokeMethod('isConnected');
 
   BehaviorSubject<bool> _isScanning = BehaviorSubject.seeded(false);
   Stream<bool> get isScanning => _isScanning.stream;
 
-  BehaviorSubject<List<BluetoothDevice>> _scanResults =
-      BehaviorSubject.seeded([]);
+  BehaviorSubject<List<BluetoothDevice>> _scanResults = BehaviorSubject.seeded([]);
   Stream<List<BluetoothDevice>> get scanResults => _scanResults.stream;
 
-  PublishSubject _stopScanPill = new PublishSubject();
+
+  Future<bool> get isConnected async {
+    return await _channel.invokeMethod('isConnected').then<bool>((d) => d);
+  }
+
+  Future<bool> get isAvailable async {
+    return await _channel.invokeMethod('isAvailable').then<bool>((d) => d);
+  }
+
+  Future<bool> get isOn async {
+    return await _channel.invokeMethod('isOn').then<bool>((d) => d);
+  }
+
+  Future<void> connect(BluetoothDevice device) async {
+    return await _channel.invokeMethod('connect', device.toJson());
+  }
+
+  Future<bool> disconnect() async {
+    bool? isSuccess = await _channel.invokeMethod('disconnect').then<bool?>((d) => d);
+    return isSuccess ?? false;
+  }
+
+  Future<bool> destroy() async {
+    bool? isSuccess = await _channel.invokeMethod('destroy').then<bool?>((d) => d);
+    return isSuccess ?? false;  
+  }
+
 
   /// Gets the current state of the Bluetooth module
   Stream<int> get state async* {
@@ -124,13 +139,6 @@ class BluetoothManager {
     _isScanning.add(false);
   }
 
-  Future<dynamic> connect(BluetoothDevice device) =>
-      _channel.invokeMethod('connect', device.toJson());
-
-  Future<dynamic> disconnect() => _channel.invokeMethod('disconnect');
-
-  Future<dynamic> destroy() => _channel.invokeMethod('destroy');
-
   Future<dynamic> writeData(List<int> bytes) {
     Map<String, Object> args = Map();
     args['bytes'] = bytes;
@@ -141,3 +149,4 @@ class BluetoothManager {
     return Future.value(true);
   }
 }
+
