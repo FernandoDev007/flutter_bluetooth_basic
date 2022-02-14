@@ -134,21 +134,24 @@ class BluetoothManager {
   }
 
   /// Stops a scan for Bluetooth Low Energy devices
-  Future stopScan() async {
+  Future<void> stopScan() async {
     await _channel.invokeMethod('stopScan');
     _stopScanPill.add(null);
     _isScanning.add(false);
   }
 
-  Future<dynamic> writeData(List<int> bytes) {
-    Map<String, Object> args = <String, Object>{};
-    args['bytes'] = bytes;
-    args['length'] = bytes.length;
+  Future<bool> writeData(List<int> bytes) async {
+    try {
+      Map<String, Object> args = <String, Object>{};
+      args['bytes'] = bytes;
+      args['length'] = bytes.length;
 
-    _channel.invokeMethod('writeData', args);
+      _channel.invokeMethod('writeData', args);
 
-    return Future.value(true);
+      return true;      
+    } catch (e) {
+      return false;
+    }
   }
-
 }
 
