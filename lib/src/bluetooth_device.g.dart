@@ -11,8 +11,8 @@ BluetoothDevice _$BluetoothDeviceFromJson(Map<String, dynamic> json) {
   return BluetoothDevice()
     ..name = json['name'] as String?
     ..address = json['address'] as String?
-    ..type = json['type'] as int
-    ..connected = json['connected'] as bool;
+    ..type = json['type'] as int?
+    ..connected = json['connected'] as bool?;
 }
 
 
