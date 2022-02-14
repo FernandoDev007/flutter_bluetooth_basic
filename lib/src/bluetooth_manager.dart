@@ -125,6 +125,7 @@ class BluetoothManager {
     });
   }
 
+
   Future startScan({
     Duration? timeout,
   }) async {
@@ -148,5 +149,6 @@ class BluetoothManager {
 
     return Future.value(true);
   }
+
 }
 

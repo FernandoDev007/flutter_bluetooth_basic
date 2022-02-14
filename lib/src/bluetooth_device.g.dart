@@ -1,10 +1,4 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
 part of 'bluetooth_device.dart';
-
-
-//**************************************************************************
-//                      JsonSerializableGenerator
-//**************************************************************************
 
 
 BluetoothDevice _$BluetoothDeviceFromJson(Map<String, dynamic> json) {

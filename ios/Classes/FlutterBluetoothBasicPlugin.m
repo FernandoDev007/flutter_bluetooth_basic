@@ -28,7 +28,7 @@
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-  NSLog(@"call method -> %@", call.method);
+  ///NSLog(@"call method -> %@", call.method);
     
   if ([@"state" isEqualToString:call.method]) {
     result(nil);
