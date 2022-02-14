@@ -5,12 +5,12 @@ import 'dart:async';
 
 
 class BluetoothManager {
-  static const String NAMESPACE = 'flutter_bluetooth_basic';
-  static const int CONNECTED = 1;
-  static const int DISCONNECTED = 0;
+  static const String nameChannel = 'flutter_bluetooth_basic';
+  static const int connected = 1;
+  static const int disconnected = 0;
 
-  static const MethodChannel _channel = const MethodChannel('$NAMESPACE/methods');
-  static const EventChannel _stateChannel = const EventChannel('$NAMESPACE/state');
+  static const MethodChannel _channel = MethodChannel('$nameChannel/methods');
+  static const EventChannel _stateChannel = EventChannel('$nameChannel/state');
 
   Stream<MethodCall> get _methodStream => _methodStreamController.stream;
   final StreamController<MethodCall> _methodStreamController = StreamController.broadcast();
@@ -24,15 +24,15 @@ class BluetoothManager {
   }
 
 
-  PublishSubject _stopScanPill = new PublishSubject();
+  final PublishSubject _stopScanPill = PublishSubject();
 
-  static BluetoothManager _instance = BluetoothManager._();
+  static final BluetoothManager _instance = BluetoothManager._();
   static BluetoothManager get instance => _instance;
 
-  BehaviorSubject<bool> _isScanning = BehaviorSubject.seeded(false);
+  final BehaviorSubject<bool> _isScanning = BehaviorSubject.seeded(false);
   Stream<bool> get isScanning => _isScanning.stream;
 
-  BehaviorSubject<List<BluetoothDevice>> _scanResults = BehaviorSubject.seeded([]);
+  final BehaviorSubject<List<BluetoothDevice>> _scanResults = BehaviorSubject.seeded([]);
   Stream<List<BluetoothDevice>> get scanResults => _scanResults.stream;
 
 
@@ -94,10 +94,10 @@ class BluetoothManager {
     try {
       await _channel.invokeMethod('startScan');
     } catch (e) {
-      print('Error starting scan.');
+      //NADA: print('Error starting scan.');
       _stopScanPill.add(null);
       _isScanning.add(false);
-      throw e;
+      rethrow;
     }
 
     yield* BluetoothManager.instance._methodStream
@@ -140,7 +140,7 @@ class BluetoothManager {
   }
 
   Future<dynamic> writeData(List<int> bytes) {
-    Map<String, Object> args = Map();
+    Map<String, Object> args = <String, Object>{};
     args['bytes'] = bytes;
     args['length'] = bytes.length;
 

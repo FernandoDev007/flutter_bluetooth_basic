@@ -1,15 +1,18 @@
 //TODO: En emuladores dara un error al inicializar, ya que estos no cuenta con Bluetooth
 ///solo funciona con los emuladores
 
-
 import 'package:flutter_bluetooth_basic/flutter_bluetooth_basic.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({
+    Key? key
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,50 +20,53 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Bluetooth Scanner'),
+      home: const HomePage(title: 'Bluetooth Scanner'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class HomePage extends StatefulWidget {
+  const HomePage({
+    Key? key,
+    required this.title
+  }) : super(key: key);
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomePageState extends State<HomePage> {
   BluetoothManager bluetoothManager = BluetoothManager.instance;
 
   bool _connected = false;
-  BluetoothDevice _device;
+  BluetoothDevice? _device;
   String tips = 'no device connect';
 
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => initBluetooth());
+    WidgetsBinding.instance!.addPostFrameCallback((_) => initBluetooth());
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initBluetooth() async {
-    bluetoothManager.startScan(timeout: Duration(seconds: 4));
+    bluetoothManager.startScan(timeout: const Duration(seconds: 4));
 
     bool isConnected = await bluetoothManager.isConnected;
 
     bluetoothManager.state.listen((state) {
-      print('cur device status: $state');
+      debugPrint('cur device status: $state');
 
       switch (state) {
-        case BluetoothManager.CONNECTED:
+        case BluetoothManager.connected:
           setState(() {
             _connected = true;
             tips = 'connect success';
           });
           break;
-        case BluetoothManager.DISCONNECTED:
+        case BluetoothManager.disconnected:
           setState(() {
             _connected = false;
             tips = 'disconnect success';
@@ -81,13 +87,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _onConnect() async {
-    if (_device != null && _device.address != null) {
-      await bluetoothManager.connect(_device);
+    if (_device != null && _device?.address != null) {
+      await bluetoothManager.connect(_device!);
     } else {
       setState(() {
         tips = 'please select device';
       });
-      print('please select device');
+      debugPrint('please select device');
     }
   }
 
@@ -114,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: RefreshIndicator(
         onRefresh: () =>
-            bluetoothManager.startScan(timeout: Duration(seconds: 4)),
+            bluetoothManager.startScan(timeout: const Duration(seconds: 4)),
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
@@ -122,57 +128,59 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                     child: Text(tips),
                   ),
                 ],
               ),
-              Divider(),
+              const Divider(),
               StreamBuilder<List<BluetoothDevice>>(
                 stream: bluetoothManager.scanResults,
-                initialData: [],
+                initialData: const [],
                 builder: (c, snapshot) => Column(
-                  children: snapshot.data
-                      .map((d) => ListTile(
-                            title: Text(d.name ?? ''),
-                            subtitle: Text(d.address),
-                            onTap: () async {
-                              setState(() {
-                                _device = d;
-                              });
-                            },
-                            trailing:
-                                _device != null && _device.address == d.address
-                                    ? Icon(
-                                        Icons.check,
-                                        color: Colors.green,
-                                      )
-                                    : null,
-                          ))
-                      .toList(),
+                  children: (snapshot.data ?? [])
+                    .map((d) => ListTile(
+                      title: Text(d.name ?? ''),
+                      subtitle: Text(d.address ?? ''),
+                      onTap: () async {
+                        setState(() {
+                          _device = d;
+                        });
+                      },
+                      trailing:
+                          _device != null && _device?.address == d.address
+                              ? const Icon(
+                                  Icons.check,
+                                  color: Colors.green,
+                                )
+                              : null,
+                    )).toList(),
                 ),
               ),
-              Divider(),
+              const Divider(),
               Container(
-                padding: EdgeInsets.fromLTRB(20, 5, 20, 10),
+                padding: const EdgeInsets.fromLTRB(20, 5, 20, 10),
                 child: Column(
                   children: <Widget>[
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
+                        // ignore: deprecated_member_use
                         OutlineButton(
-                          child: Text('connect'),
+                          child: const Text('connect'),
                           onPressed: _connected ? null : _onConnect,
                         ),
-                        SizedBox(width: 10.0),
+                        const SizedBox(width: 10.0),
+                        // ignore: deprecated_member_use
                         OutlineButton(
-                          child: Text('disconnect'),
+                          child: const Text('disconnect'),
                           onPressed: _connected ? _onDisconnect : null,
                         ),
                       ],
                     ),
+                    // ignore: deprecated_member_use
                     OutlineButton(
-                      child: Text('Send test data'),
+                      child: const Text('Send test data'),
                       onPressed: _connected ? _sendData : null,
                     ),
                   ],
@@ -186,17 +194,17 @@ class _MyHomePageState extends State<MyHomePage> {
         stream: bluetoothManager.isScanning,
         initialData: false,
         builder: (c, snapshot) {
-          if (snapshot.data) {
+          if (snapshot.data ?? false) {
             return FloatingActionButton(
-              child: Icon(Icons.stop),
+              child: const Icon(Icons.stop),
               onPressed: () => bluetoothManager.stopScan(),
               backgroundColor: Colors.red,
             );
           } else {
             return FloatingActionButton(
-                child: Icon(Icons.search),
-                onPressed: () =>
-                    bluetoothManager.startScan(timeout: Duration(seconds: 4)));
+              child: const Icon(Icons.search),
+              onPressed: () =>
+                  bluetoothManager.startScan(timeout: const Duration(seconds: 4)));
           }
         },
       ),
