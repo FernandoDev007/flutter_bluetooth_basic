@@ -288,7 +288,7 @@ public class DeviceConnFactoryManager {
     public static void closeAllPort() {
         for (DeviceConnFactoryManager deviceConnFactoryManager : deviceConnFactoryManagers) {
             if (deviceConnFactoryManager != null) {
-                Log.e(TAG, "cloaseAllPort() id -> " + deviceConnFactoryManager.id);
+                ///Log.e(TAG, "cloaseAllPort() id -> " + deviceConnFactoryManager.id);
                 deviceConnFactoryManager.closePort(deviceConnFactoryManager.id);
                 deviceConnFactoryManagers[deviceConnFactoryManager.id] = null;
             }

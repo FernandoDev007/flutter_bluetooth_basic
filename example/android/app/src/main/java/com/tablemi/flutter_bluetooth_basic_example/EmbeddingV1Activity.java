@@ -1,10 +1,9 @@
+import com.tablemi.flutter_bluetooth_basic.FlutterBluetoothBasicPlugin;
 package com.tablemi.flutter_bluetooth_basic_example;
-
+import io.flutter.app.FlutterActivity;
 import android.os.Bundle;
 
-import com.tablemi.flutter_bluetooth_basic.FlutterBluetoothBasicPlugin;
 
-import io.flutter.app.FlutterActivity;
 
 public class EmbeddingV1Activity extends FlutterActivity {
     @Override

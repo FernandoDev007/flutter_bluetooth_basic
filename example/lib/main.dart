@@ -1,4 +1,4 @@
-//TODO: En emuladores dara un error al inicializar, ya que estos no cuenta con Bluetooth
+//NADA: En emuladores dara un error al inicializar, ya que estos no cuenta con Bluetooth
 ///solo funciona con los emuladores
 
 import 'package:flutter_bluetooth_basic/flutter_bluetooth_basic.dart';
@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Bluetooth scanner',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
