@@ -1,20 +1,13 @@
 # flutter_bluetooth_basic
 
-Flutter plugin that allows to find bluetooth devices & send raw bytes data.
-Supports both Android and iOS.
+Complemento Flutter que permite encontrar dispositivos bluetooth y enviar datos de bytes sin procesar.
+Soporta tanto Android como iOS.
 
-Inspired by [bluetooth_print](https://github.com/thon-ju/bluetooth_print).
+Este paquete es literalmente, una bifurcación de la bifurcación
 
+Y en caso hubiera alguna actualizacion en las ramas principales, hare una pull con sus ultimas mejoras...
 
-## Main Features
-* Android and iOS support
-* Scan for bluetooth devices
-* Send raw `List<int> bytes` data to a device
-
-
-## Getting Started
-
-For a full example please check */example* folder. Here are only the most important parts of the code to illustrate how to use the library.
+# Ejemplo de uso
 
 ```dart
 BluetoothManager bluetoothManager = BluetoothManager.instance;
@@ -44,6 +37,3 @@ await bluetoothManager.writeData(bytes);
 
 await bluetoothManager.disconnect();
 ```
-
-## See also
-* Example of usage in a project: [esc_pos_printer](https://github.com/andrey-ushakov/esc_pos_printer)
