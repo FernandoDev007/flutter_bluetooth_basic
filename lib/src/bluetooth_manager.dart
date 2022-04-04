@@ -37,15 +37,18 @@ class BluetoothManager {
 
 
   Future<bool> get isConnected async {
-    return await _channel.invokeMethod('isConnected').then<bool>((d) => d);
+    return await _channel.invokeMethod('isConnected')
+      .then<bool?>((d) => d) ?? false;
   }
 
   Future<bool> get isAvailable async {
-    return await _channel.invokeMethod('isAvailable').then<bool>((d) => d);
+    return await _channel.invokeMethod('isAvailable')
+      .then<bool?>((d) => d) ?? false;
   }
 
   Future<bool> get isOn async {
-    return await _channel.invokeMethod('isOn').then<bool>((d) => d);
+    return await _channel.invokeMethod('isOn')
+      .then<bool?>((d) => d) ?? false;
   }
 
   Future<void> connect(BluetoothDevice device) async {
@@ -53,13 +56,13 @@ class BluetoothManager {
   }
 
   Future<bool> disconnect() async {
-    bool? isSuccess = await _channel.invokeMethod('disconnect').then<bool?>((d) => d);
-    return isSuccess ?? false;
+    return await _channel.invokeMethod('disconnect')
+      .then<bool?>((d) => d) ?? false;
   }
 
   Future<bool> destroy() async {
-    bool? isSuccess = await _channel.invokeMethod('destroy').then<bool?>((d) => d);
-    return isSuccess ?? false;  
+    return await _channel.invokeMethod('destroy')
+      .then<bool?>((d) => d) ?? false;
   }
 
 
