@@ -8,17 +8,13 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
-      channel.name,
-      (message) async => ByteData(42),
-    );
+    channel.setMockMethodCallHandler((MethodCall methodCall) async {
+      return '42';
+    });
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
-      channel.name,
-      (message) async => null,
-    );
+    channel.setMockMethodCallHandler(null);
   });
 }
 
