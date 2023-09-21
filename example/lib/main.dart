@@ -1,9 +1,29 @@
 //NADA: En emuladores dara un error al inicializar, ya que estos no cuenta con Bluetooth
 ///solo funciona con los emuladores
 
-import 'package:flutter_bluetooth_basic/flutter_bluetooth_basic.dart';
-import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:flutter/material.dart';
+
+import 'package:flutter_bluetooth_basic/flutter_bluetooth_basic.dart';
+
+
+
+// ignore: slash_for_doc_comments
+/**
+[VERBOSE-2:dart_vm_initializer.cc(41)] Unhandled Exception: type 'String' is not a subtype of type 'List<dynamic>?' in type cast
+#0      MethodChannel._invokeMethod
+package:flutter/…/services/platform_channel.dart:310
+<asynchronous suspension>
+#1      BluetoothThermalPrinter.getBluetooths
+package:bluetooth_thermal_printer/bluetooth_thermal_printer.dart:
+19
+<asynchronous suspension>
+#2      Watersoft.getBluetooth
+package:watersoftfactapp/src/Watersoft.dart:499
+<asynchronous suspension>
+#3      _ConfigurarImpresoraPageState.build.<anonymous closure>.<anonymous closure> (package:watersoftfactapp/src/pages/configurar%20impresora/ConfigurarImpresora.page.dart:64:21)
+<asynchronous suspension>
+ */
 
 
 void main() => runApp(const MyApp());
@@ -34,10 +54,10 @@ class HomePage extends StatefulWidget {
   final String title;
 
   @override
-  _HomePageState createState() => _HomePageState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
   BluetoothManager bluetoothManager = BluetoothManager.instance;
 
   bool _connected = false;
@@ -48,7 +68,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance!.addPostFrameCallback((_) => initBluetooth());
+    WidgetsBinding.instance.addPostFrameCallback((_) => initBluetooth());
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -167,22 +187,22 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         // ignore: deprecated_member_use
-                        OutlineButton(
-                          child: const Text('connect'),
+                        TextButton(
                           onPressed: _connected ? null : _onConnect,
+                          child: const Text('connect'),
                         ),
                         const SizedBox(width: 10.0),
                         // ignore: deprecated_member_use
-                        OutlineButton(
-                          child: const Text('disconnect'),
+                        TextButton(
                           onPressed: _connected ? _onDisconnect : null,
+                          child: const Text('disconnect'),
                         ),
                       ],
                     ),
                     // ignore: deprecated_member_use
-                    OutlineButton(
-                      child: const Text('Send test data'),
+                    TextButton(
                       onPressed: _connected ? _sendData : null,
+                      child: const Text('Send test data'),
                     ),
                   ],
                 ),
@@ -197,9 +217,9 @@ class _HomePageState extends State<HomePage> {
         builder: (c, snapshot) {
           if (snapshot.data ?? false) {
             return FloatingActionButton(
-              child: const Icon(Icons.stop),
               onPressed: () => bluetoothManager.stopScan(),
               backgroundColor: Colors.red,
+              child: const Icon(Icons.stop),
             );
           } else {
             return FloatingActionButton(
