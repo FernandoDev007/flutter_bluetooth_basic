@@ -6,7 +6,9 @@ import 'dart:io';
 
 /// Printer Bluetooth Manager
 class PrinterBluetoothManager {
-  PrinterBluetoothManager();
+  PrinterBluetoothManager._();
+  static final PrinterBluetoothManager _instance = PrinterBluetoothManager._();
+  static PrinterBluetoothManager get instance => _instance;
 
   final BluetoothManager _bluetoothManager = BluetoothManager.instance;
 
@@ -46,6 +48,26 @@ class PrinterBluetoothManager {
     });
   }
 
+  void startSmartScan(Duration timeout) async {
+    _scanResults.add(<PrinterBluetooth>[]);
+
+    _bluetoothManager.startSmartScan(timeout: timeout);
+
+    _scanResultsSubscription = _bluetoothManager.smartStreamBluetoothDevices.listen((devices) {
+      _scanResults.value = <PrinterBluetooth>[];
+      _scanResults.add(devices.map((device) => PrinterBluetooth(device)).toList());
+    });
+
+    _isScanningSubscription = _bluetoothManager.isScanning.listen((isScanningCurrent) async {
+      // If isScanning value changed (scan just stopped)
+      if (_isScanning.value && !isScanningCurrent) {
+        _scanResultsSubscription!.cancel();
+        _isScanningSubscription!.cancel();
+      }
+      _isScanning.add(isScanningCurrent);
+    });
+  }
+
   Future<dynamic> stopScan() {
     return _bluetoothManager.stopScan();
   }
@@ -58,70 +80,81 @@ class PrinterBluetoothManager {
     List<int> bytes, {
     int chunkSizeBytes = 20,
     int queueSleepTimeMs = 20,
+    bool printRawData = false,
   }) async {
-    final Completer<PosPrintResult> completer = Completer();
+    try {
+      final Completer<PosPrintResult> completer = Completer();
 
-    const int timeout = 5;
-    if (_selectedPrinter == null) {
-      return Future<PosPrintResult>.value(PosPrintResult.printerNotSelected);
-    } else if (_isScanning.value) {
-      return Future<PosPrintResult>.value(PosPrintResult.scanInProgress);
-    } else if (_isPrinting) {
-      return Future<PosPrintResult>.value(PosPrintResult.printInProgress);
+      const int timeout = 5;
+      if (_selectedPrinter == null) {
+        return Future<PosPrintResult>.value(PosPrintResult.printerNotSelected);
+      } else if (_isScanning.value) {
+        return Future<PosPrintResult>.value(PosPrintResult.scanInProgress);
+      } else if (_isPrinting) {
+        return Future<PosPrintResult>.value(PosPrintResult.printInProgress);
+      }
+
+      _isPrinting = true;
+
+      // We have to rescan before connecting, otherwise we can connect only once
+      await _bluetoothManager.startScan(timeout: const Duration(seconds: 1));
+      await _bluetoothManager.stopScan();
+
+      // Connect
+      await _bluetoothManager.connect(_selectedPrinter!.device);
+
+      // Subscribe to the events
+      _bluetoothManager.state.listen((state) async {
+        switch (state) {
+          case BluetoothManager.connected:
+            // To avoid double call
+            if (!_isConnected) {
+              if (printRawData) {
+                await _bluetoothManager.writeData(bytes);
+
+                completer.complete(PosPrintResult.success);
+              } else {
+                final len = bytes.length;
+                List<List<int>> chunks = [];
+                for (var i = 0; i < len; i += chunkSizeBytes) {
+                  var end = (i + chunkSizeBytes < len) ? i + chunkSizeBytes : len;
+                  chunks.add(bytes.sublist(i, end));
+                }
+
+                for (var i = 0; i < chunks.length; i += 1) {
+                  await _bluetoothManager.writeData(chunks[i]);
+                  sleep(Duration(milliseconds: queueSleepTimeMs));
+                }
+
+                completer.complete(PosPrintResult.success);
+              }
+            }
+            _runDelayed(3).then((dynamic v) async {
+              await _bluetoothManager.disconnect();
+              _isPrinting = false;
+            });
+            _isConnected = true;
+            break;
+          case BluetoothManager.disconnected:
+            _isConnected = false;
+            break;
+          default:
+            break;
+        }
+      });
+
+      // Printing timeout
+      _runDelayed(timeout).then((dynamic v) async {
+        if (_isPrinting) {
+          _isPrinting = false;
+          completer.complete(PosPrintResult.timeout);
+        }
+      });
+
+      return completer.future;
+    } catch (e) {
+      return Future<PosPrintResult>.value(PosPrintResult.errorInScaning);
     }
-
-    _isPrinting = true;
-
-    // We have to rescan before connecting, otherwise we can connect only once
-    await _bluetoothManager.startScan(timeout: const Duration(seconds: 1));
-    await _bluetoothManager.stopScan();
-
-    // Connect
-    await _bluetoothManager.connect(_selectedPrinter!.device);
-
-    // Subscribe to the events
-    _bluetoothManager.state.listen((state) async {
-      switch (state) {
-        case BluetoothManager.connected:
-          // To avoid double call
-          if (!_isConnected) {
-            final len = bytes.length;
-            List<List<int>> chunks = [];
-            for (var i = 0; i < len; i += chunkSizeBytes) {
-              var end = (i + chunkSizeBytes < len) ? i + chunkSizeBytes : len;
-              chunks.add(bytes.sublist(i, end));
-            }
-
-            for (var i = 0; i < chunks.length; i += 1) {
-              await _bluetoothManager.writeData(chunks[i]);
-              sleep(Duration(milliseconds: queueSleepTimeMs));
-            }
-
-            completer.complete(PosPrintResult.success);
-          }
-          _runDelayed(3).then((dynamic v) async {
-            await _bluetoothManager.disconnect();
-            _isPrinting = false;
-          });
-          _isConnected = true;
-          break;
-        case BluetoothManager.disconnected:
-          _isConnected = false;
-          break;
-        default:
-          break;
-      }
-    });
-
-    // Printing timeout
-    _runDelayed(timeout).then((dynamic v) async {
-      if (_isPrinting) {
-        _isPrinting = false;
-        completer.complete(PosPrintResult.timeout);
-      }
-    });
-
-    return completer.future;
   }
 
   Future<PosPrintResult> printTicket(
